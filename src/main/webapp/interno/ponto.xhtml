@@ -1,0 +1,149 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="p" value="#{pontoBean.pontos}" id="pontoList"
+                             styleClass="userDataTableStyle" 
+                             paginator="true" 
+                             rows="10" 
+                             rowsPerPageTemplate="10,15,50,100" 
+                             widgetVar="pontoTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhuma Ponto Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Ponto" 
+                                         oncomplete="PF('pontoDialog').show();" 
+                                         ajax="true" 
+                                         update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" 
+                                         action="#{pontoBean.limpar()}"  />
+                    </f:facet>
+
+
+                    <p:column headerText="Código" style="width: 10%" priority="1">
+                        <p:commandLink value="#{p.id}" update=":userDetailForm:display" oncomplete="PF('pontoDialog').show();"  >
+                            <f:setPropertyActionListener value="#{p}" target="#{pontoBean.p}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Aréa" style="width:10%" priority="2">  
+                        <h:outputText value="#{p.modulo.area.descricao}" />  
+                    </p:column>  
+                    
+                    <p:column headerText="Modulo" style="width:10%" priority="3">  
+                        <h:outputText value="#{p.modulo.descricao}" />  
+                    </p:column>  
+
+                    <p:column headerText="Rotulo" style="width:20%" priority="4">  
+                        <h:outputText value="#{p.rotulo}" />  
+                    </p:column>  
+                   
+                    <p:column headerText="Saída" style="width:15%" priority="5">  
+                        <h:outputText value="#{p.portaModelo}" />  
+                    </p:column>  
+
+                    <p:column  headerText="Situação" style="width:15%" priority="6">  
+                        <h:outputText value="Ativo" rendered="#{p.inAtivo=='A'}" />  
+                        <h:outputText value="Inativo" rendered="#{p.inAtivo =='I'}" />  
+                    </p:column> 
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="7">  
+                        <p:commandButton icon="fa icon-trash Fs15 white"
+                                         update=":userDetailFormDel:displayDel,:form:pontoList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{p}" target="#{pontoBean.p}" />  
+                        </p:commandButton>
+                    </p:column>  
+                    
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:pontoList , :growl" oncomplete="PF('delDialog').hide(); " actionListener="#{pontoBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" update=":form:pontoList , :growl" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Ponto" widgetVar="pontoDialog"  id="pontoDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Código :" for="cod"/>
+                        <h:outputText id="cod" value="#{pontoBean.p.id}" style="width: 10%" />
+
+                        <p:outputLabel value="Rotulo :" for="descricao" />
+                        <p:inputText id="descricao" value="#{pontoBean.p.rotulo}" required="true"  style="width: 60%"/>
+
+                        <p:outputLabel value="Modulo :" for="modulo" />
+                        <p:selectOneMenu id="modulo" value="#{pontoBean.p.modulo}" converter="simpleIndexConverter" required="true">
+                            <p:ajax event="change" process="@this" update="porta" partialSubmit="true"/>
+                            <f:selectItems value="#{moduloBean.modulosConverter}" 
+                                           var="m" 
+                                           itemValue="#{m}"
+                                           />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Porta :" for="porta" />
+                        <p:selectOneMenu id="porta" value="#{pontoBean.p.portaModelo}" converter="simpleIndexConverter" required="true">
+                            <f:selectItems value="#{pontoBean.p.modulo.modelo.portaModelosConverter}" 
+                                           var="p" 
+                                           itemValue="#{p}"
+                                           />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Situação :" for="sit" />
+                        <p:selectOneRadio id="sit" value="#{pontoBean.p.inAtivo}" required="true">
+                            <f:selectItem itemLabel="Ativo" itemValue="A" />
+                            <f:selectItem itemLabel="Inativo" itemValue="I" />
+                        </p:selectOneRadio>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" 
+                                             update="userDetailForm, :form:pontoList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'pontoDialog')" 
+                                             actionListener="#{pontoBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+
+
+                </h:form>
+            </p:dialog> 
+
+            <p:growl id="growl" showDetail="true"/>  
+
+
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

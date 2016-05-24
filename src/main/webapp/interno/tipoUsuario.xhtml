@@ -1,0 +1,121 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="t" value="#{tipoUsuarioBean.tipos}" id="tipoUsuarioList" editable="true"
+                             styleClass="userDataTableStyle" paginator="true" rows="10" 
+                             lazy="true" rowsPerPageTemplate="10,15,50,100" widgetVar="tipoUsuarioTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhuma Tipo de Usuário Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Tipo de Usuário" oncomplete="PF('tipoUsuarioDialog').show();" 
+                                         ajax="true" update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" title="Cadastro" 
+                                         action="#{tipoUsuarioBean.limpar()}"  />
+
+                    </f:facet>
+
+
+                    <p:ajax event="rowEdit" listener="#{tipoUsuarioBean.onRowEdit}" update=":form:messages" />  
+                    <p:ajax event="rowEditCancel"  update=":form:messages" />  
+
+                    <p:column headerText="Código" style="width: 5%" priority="1">
+                        <p:commandLink value="#{t.id}" update=":userDetailForm:display" oncomplete="PF('tipoUsuarioDialog').show();"  >
+                            <f:setPropertyActionListener value="#{t}" target="#{tipoUsuarioBean.t}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Descrição" style="width:40%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{t.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{t.descricao}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column headerText="Editar" style="width:10%" priority="4">  
+                        <p:rowEditor />  
+                    </p:column>   
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="5">  
+                        <f:facet name="header">  
+                            <h:outputText value=""/>  
+                        </f:facet> 
+                        <p:commandButton icon="fa icon-trash Fs15 white" 
+                                         update=":userDetailFormDel:displayDel,:form:tipoUsuarioList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{t}" target="#{tipoUsuarioBean.t}" />  
+                        </p:commandButton>
+                    </p:column>  
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:tipoUsuarioList , :growl" 
+                                             oncomplete="PF('delDialog').hide(); " 
+                                             actionListener="#{tipoUsuarioBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Tipo de Usuário" widgetVar="tipoUsuarioDialog"  id="tipoUsuarioDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Código :" for="cod"/>
+                        <h:outputText id="cod" value="#{tipoUsuarioBean.t.id}" style="width: 10%" />
+
+                        <p:outputLabel value="Descrição :" for="descricao" />
+                        <p:inputText id="descricao" value="#{tipoUsuarioBean.t.descricao}" required="true"  style="width: 60%"/>
+
+                        
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" 
+                                             update="userDetailForm ,:form:tipoUsuarioList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'tipoUsuarioDialog')" 
+                                             actionListener="#{tipoUsuarioBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+
+                </h:form>
+            </p:dialog> 
+            <p:growl id="growl" showDetail="true"/>  
+
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

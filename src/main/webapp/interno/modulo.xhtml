@@ -1,0 +1,219 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="m" value="#{moduloBean.modulos}" 
+                             id="moduloList" 
+                             editable="true"
+                             styleClass="userDataTableStyle"
+                             paginator="true" rows="10" 
+                             lazy="true" 
+                             rowsPerPageTemplate="10,15,50,100" 
+                             widgetVar="moduloTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhum Modulo Cadastrado" >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Módulo" 
+                                         oncomplete="PF('moduloDialog').show();" 
+                                         ajax="true" 
+                                         update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" 
+                                         action="#{moduloBean.addNovoDispositivo()}"  />
+                    </f:facet>
+
+
+                    <p:ajax event="rowEdit" listener="#{moduloBean.onRowEdit}" update=":form:messages" />  
+                    <p:ajax event="rowEditCancel"  update=":form:messages" />  
+
+                    <p:column headerText="Código" style="width: 10%" priority="0">
+                        <p:commandLink value="#{m.id}" update=":userDetailFormCad:display" oncomplete="PF('cadModuloDialog').show();"  >
+                            <f:setPropertyActionListener value="#{m}" target="#{moduloBean.m}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Aréa" style="width:25%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{m.area.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:selectOneMenu value="#{m.area}" 
+                                                 converter="simpleIndexConverter" 
+                                                 style="width: 85%"
+                                                 required="true">
+                                    <f:selectItems value="#{areaBean.areasConverter}" var="area" itemValue="#{area}"/>
+                                </p:selectOneMenu>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column headerText="Descrição" style="width:30%" priority="1">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{m.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{m.descricao}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+
+
+                    <p:column  headerText="Situação" style="width:10%" priority="3">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="Ativo" rendered="#{m.inAtivo=='A'}" />  
+                                <h:outputText value="Inativo" rendered="#{m.inAtivo =='I'}" />  
+                            </f:facet>  
+                            <f:facet name="input" >  
+                                <p:selectOneRadio value="#{m.inAtivo}" required="true" tabindex="0" >
+                                    <f:selectItem itemLabel="Ativo" itemValue="A"  />
+                                    <f:selectItem itemLabel="Inativo" itemValue="I" />
+                                </p:selectOneRadio>
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column> 
+
+                    <p:column headerText="Editar" style="width:10%" priority="4">  
+                        <p:rowEditor />  
+                    </p:column>   
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="5">  
+                        <f:facet name="header">  
+                            <h:outputText value=""/>  
+                        </f:facet> 
+                        <p:commandButton icon="fa icon-trash Fs15 white" 
+                                         update=":userDetailFormDel:displayDel,:form:moduloList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{m}" target="#{moduloBean.m}" />  
+                        </p:commandButton>
+                    </p:column>  
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:moduloList , :growl" oncomplete="PF('delDialog').hide(); " actionListener="#{moduloBean.del()}"/>
+                        </f:facet>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" update=":form:moduloList , :growl" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Modulo" widgetVar="moduloDialog"  id="moduloDlg"  width="600" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:dataTable value="#{moduloBean.disposistivosOnline}" var="d" 
+                                     emptyMessage="Servidor Socket offline ou nenhum módulo conectado">
+
+                            <p:column headerText="Id" style="width:10%" priority="0">  
+                                <h:outputText value="#{d.ID}" />  
+                            </p:column>  
+
+                            <p:column headerText="IP" style="width:20%" priority="2">  
+                                <h:outputText value="#{d.IP}" />  
+                            </p:column>  
+
+                            <p:column headerText="Modelo" style="width:25%" priority="3">  
+                                <h:outputText value="#{d.modulo}" />  
+                            </p:column>  
+
+                            <p:column headerText="Protocolo" style="width:15%" priority="4">  
+                                <h:outputText value="#{d.prot}" />  
+                            </p:column>  
+
+                            <p:column  style="width:30%" priority="1" >  
+
+                                <p:graphicImage height="20" style="text-align: center" name="/imagens/ativo.png" rendered="#{d.inCadastrado ==true}"/>
+
+                                <p:commandButton value="Cadastrar" update=":userDetailFormCad:display , :growl" 
+                                                 icon="fa icon-doc-add Fs18 white" 
+                                                 oncomplete="PF('cadModuloDialog').show();PF('moduloDialog').hide();"
+                                                 rendered="#{d.inCadastrado ==false}"
+                                                 action="#{moduloBean.cadastrar()}"
+                                                 >
+                                    <f:setPropertyActionListener value="#{d}" target="#{moduloBean.dispositivo}" /> 
+                                </p:commandButton>
+                            </p:column>  
+
+                        </p:dataTable>
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Cadastrar Modulo" widgetVar="cadModuloDialog"  id="cadModuloDlg" height="230" width="330" > 
+                <h:form id="userDetailFormCad">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Id" />  
+                        <h:outputText value="#{moduloBean.m.id}" />  
+
+                        <p:outputLabel value="Modelo" />  
+                        <h:outputText value="#{moduloBean.m.modelo.id} - #{moduloBean.m.modelo.descricao}"/>  
+
+                        <p:outputLabel for="desc" value="Descrição" />  
+                        <p:inputText id="desc" value="#{moduloBean.m.descricao}" required="true" />  
+
+                        <p:outputLabel value="Situação :" for="sit" />
+                        <p:selectOneRadio id="sit" value="#{moduloBean.m.inAtivo}" required="true">
+                            <f:selectItem itemLabel="Ativo" itemValue="A" />
+                            <f:selectItem itemLabel="Inativo" itemValue="I" />
+                        </p:selectOneRadio>
+
+                        <p:outputLabel value="Aréa" for="area"/>
+                        <p:selectOneMenu id="area"  value="#{moduloBean.m.area}" converter="simpleIndexConverter" style="width: 85%" >
+                            <f:selectItems value="#{areaBean.areasConverter}" var="ar" itemValue="#{ar}" />
+                        </p:selectOneMenu>
+
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" 
+                                             process="userDetailFormCad"
+                                             update="userDetailFormCad ,:form:moduloList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'cadModuloDialog')" 
+                                             actionListener="#{moduloBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+
+            <p:growl id="growl" showDetail="true"/>  
+
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

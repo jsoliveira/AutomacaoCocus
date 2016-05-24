@@ -1,0 +1,167 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="a" value="#{areaBean.areas}" selection="#{areaBean.a}" id="areaList" editable="true"
+                             styleClass="userDataTableStyle" paginator="true" rows="10" 
+                             lazy="true" rowsPerPageTemplate="10,15,50,100" widgetVar="areaTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhuma Aréa Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Aréa" oncomplete="PF('areaDialog').show();" 
+                                         ajax="true" update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" title="Cadastro" 
+                                         action="#{areaBean.clear()}"  />
+
+                    </f:facet>
+
+
+                    <p:ajax event="rowEdit" listener="#{areaBean.onRowEdit}" update=":form:messages" />  
+                    <p:ajax event="rowEditCancel"  update=":form:messages" />  
+
+                    <p:column headerText="Código" style="width: 5%" priority="1">
+                        <p:commandLink value="#{a.id}" update=":userDetailForm:display" oncomplete="PF('areaDialog').show();"  >
+                            <f:setPropertyActionListener value="#{a}" target="#{areaBean.a}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Descrição" style="width:40%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{a.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{a.descricao}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column  headerText="Situação" style="width:20%" priority="3">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="Ativo" rendered="#{a.inAtivo=='A'}" />  
+                                <h:outputText value="Inativo" rendered="#{a.inAtivo =='I'}" />  
+                            </f:facet>  
+                            <f:facet name="input" >  
+                                <p:selectOneRadio value="#{a.inAtivo}" required="true" tabindex="0" >
+                                    <f:selectItem itemLabel="Ativo" itemValue="A"  />
+                                    <f:selectItem itemLabel="Inativo" itemValue="I" />
+                                </p:selectOneRadio>
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column> 
+
+                    <p:column headerText="Editar" style="width:10%" priority="4">  
+                        <p:rowEditor />  
+                    </p:column>   
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="5">  
+                        <f:facet name="header">  
+                            <h:outputText value=""/>  
+                        </f:facet> 
+                        <p:commandButton icon="fa icon-trash Fs15 white" 
+                                         update=":userDetailFormDel:displayDel,:form:areaList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{a}" target="#{areaBean.a}" />  
+                        </p:commandButton>
+                    </p:column>  
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:areaList , :growl" oncomplete="PF('delDialog').hide(); " actionListener="#{areaBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" update=":form:areaList , :growl" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Aréa" widgetVar="areaDialog"  id="areaDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Código :" for="cod"/>
+                        <h:outputText id="cod" value="#{areaBean.a.id}" style="width: 10%" />
+
+                        <p:outputLabel value="Descrição :" for="descricao" />
+                        <p:inputText id="descricao" value="#{areaBean.a.descricao}" required="true"  style="width: 60%"/>
+
+
+                        <p:outputLabel value="Situação :" for="sit" />
+                        <p:selectOneRadio id="sit" value="#{areaBean.a.inAtivo}" required="true">
+                            <f:selectItem itemLabel="Ativo" itemValue="A" />
+                            <f:selectItem itemLabel="Inativo" itemValue="I" />
+                        </p:selectOneRadio>
+
+                        <!--<p:commandButton value="Adicionar Imagem" update=":formImagem , :growl" icon="ui-icon-star" oncomplete="PF('imagemDlg').show();" />-->
+                        <p:graphicImage id="img" name="#{areaBean.a.localImagem}" rendered="#{areaBean.a.localImagem !=null}"/>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" 
+                                             update="userDetailForm ,:form:areaList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'areaDialog')" 
+                                             actionListener="#{areaBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+
+                </h:form>
+            </p:dialog> 
+
+            <p:dialog header="Imagem" id="imagemDialog" widgetVar="imagemDlg" >
+
+                <h:form id="formImagem" enctype="multipart/form-data">
+                    <p:fileUpload id="file_upload" 
+                                  mode="advanced" 
+                                  style="margin-top: 15px;"
+                                  requiredMessage="É necessário o envio de pelo menos um arquivo!"
+                                  fileUploadListener="#{areaBean.fileUploadAction}"
+                                  allowTypes="/(\.|\/)(jpg|png|jpeg)$/"
+                                  invalidFileMessage="Tipo de arquivo não permitido" 
+                                  invalidSizeMessage="Arquivo com tamanho acima do permitido" 
+                                  uploadLabel="Enviar Arquivo" 
+                                  cancelLabel="Cancelar"  
+                                  label="Selecionar..." 
+                                  multiple="false" 
+                                  sizeLimit="10485760" 
+                                  update=":userDetailForm:img ,:growl"
+                                  />
+                </h:form>
+
+            </p:dialog>
+
+            <p:growl id="growl" showDetail="true"/>  
+
+
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

@@ -1,0 +1,56 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <div class="ContainerIndent">
+
+            <h:form id="formPrincipal">
+
+                <!--<p:poll interval="1"   update="grid"/>--> 
+
+                <h:panelGrid  id="grid" style="width: 100px;height: 100px"  columns="3"  cellpadding="10px">
+
+                    <h:panelGrid>
+                        <p:outputLabel value="Led1" for="imgSD0"/>
+                        <p:graphicImage  id="imgSD0" style="text-align:  center" height="90px" width="90px"  name="#{indexBean.imgSD0}" />               
+                        <p:inputSwitch  id="ligadoSD0" value="#{indexBean.ligadoSD0}" onLabel="Ligado" offLabel="Desligado"  >
+                            <p:ajax listener="#{indexBean.ligarSD0()}" update="imgSD0   :formPrincipal:msg"/>
+                        </p:inputSwitch>
+                    </h:panelGrid>
+
+                    <h:panelGrid>
+                        <p:outputLabel value="Led2" for="imgSD1"/>
+                        <p:graphicImage  id="imgSD1" style="text-align:  center" height="90px" width="90px"  name="#{indexBean.imgSD1}" />               
+                        <p:inputSwitch id="ligadoSD1" value="#{indexBean.ligadoSD1}" onLabel="Ligado" offLabel="Desligado"  >
+                            <p:ajax listener="#{indexBean.ligarSD1()}" update="imgSD1   :formPrincipal:msg"/>
+                        </p:inputSwitch>
+                    </h:panelGrid>
+
+                    <h:panelGrid>
+                        <p:outputLabel value="Lâmpada" for="imgST0"/>
+                        <p:graphicImage  id="imgST0" style="text-align:  center" height="90px" width="90px"  name="#{indexBean.imgST0}" />               
+                        <p:inputSwitch id="ligadoST0" value="#{indexBean.ligadoST0}" onLabel="Ligado" offLabel="Desligado"  >
+                            <p:ajax listener="#{indexBean.ligarST0()}" update="imgST0 :formPrincipal:msg"/>
+                        </p:inputSwitch>
+                    </h:panelGrid>
+
+
+
+                </h:panelGrid>
+
+                <p:growl id="msg"/>
+                <p:graphicImage 
+                    style="text-align:center" 
+                    height="400px" 
+                    width="800px"  
+                    name="/imagens/planta4.jpg"/>               
+            </h:form>
+
+        </div>
+    </ui:define>
+
+</ui:composition>

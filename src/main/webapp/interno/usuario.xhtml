@@ -1,0 +1,214 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="u" value="#{usuarioBean.usuarios}" id="usuarioList" editable="true"
+                             styleClass="userDataTableStyle" paginator="true" rows="10" 
+                             lazy="true" rowsPerPageTemplate="10,15,50,100" widgetVar="usuarioTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhuma Usuário Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Usuário" oncomplete="PF('usuarioDialog').show();" 
+                                         ajax="true" update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" 
+                                         action="#{usuarioBean.limpar()}"  />
+
+                    </f:facet>
+
+
+                    <p:ajax event="rowEdit" listener="#{usuarioBean.onRowEdit}" update=":form:messages" />  
+                    <p:ajax event="rowEditCancel"  update=":form:messages" />  
+
+                    <p:column headerText="Código" style="width: 5%" priority="1">
+                        <p:commandLink value="#{u.id}" update=":userDetailForm:display" oncomplete="PF('usuarioDialog').show();"  >
+                            <f:setPropertyActionListener value="#{u}" target="#{usuarioBean.u}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Nome" style="width:25%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{u.nome}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{u.nome}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column headerText="Login" style="width:20%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{u.login}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{u.login}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column headerText="Nivel Usuário" style="width:10%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{u.tipoUsuario.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:selectOneMenu  value="#{u.tipoUsuario}" converter="simpleIndexConverter" style="width: 85%" >
+                                    <f:selectItems value="#{tipoUsuarioBean.tiposConverter}" var="t" itemValue="#{t}"/>
+                                </p:selectOneMenu> 
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column  headerText="Situação" style="width:10%" priority="3">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="Ativo" rendered="#{u.inAtivo=='A'}" />  
+                                <h:outputText value="Inativo" rendered="#{u.inAtivo =='I'}" />  
+                            </f:facet>  
+                            <f:facet name="input" >  
+                                <p:selectOneRadio value="#{u.inAtivo}" required="true" tabindex="0" >
+                                    <f:selectItem itemLabel="Ativo" itemValue="A"  />
+                                    <f:selectItem itemLabel="Inativo" itemValue="I" />
+                                </p:selectOneRadio>
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column> 
+
+
+
+
+                    <p:column headerText="Ações" style="width: 25%" priority="5">  
+                        <p:rowEditor style="float: left;width: 40px" />  
+
+                        <p:commandButton value=" Redefinir" icon="fa icon-key-outline Fs15 white" 
+                                         update=":formSenhaUsuario:displayRedefinir,:form:usuarioList" 
+                                         oncomplete="PF('senhaDialog').show()">
+
+                            <f:setPropertyActionListener value="#{u}" target="#{usuarioBean.u}" />  
+                        </p:commandButton>
+
+                        <p:commandButton icon="fa icon-trash Fs15 white" 
+                                         update=":userDetailFormDel:displayDel,:form:usuarioList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{u}" target="#{usuarioBean.u}" />  
+                        </p:commandButton>
+
+                    </p:column>  
+                </p:dataTable> 
+            </h:form>
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:usuarioList , :growl" oncomplete="PF('delDialog').hide(); " 
+                                             actionListener="#{usuarioBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Usuário" widgetVar="usuarioDialog"  id="usuarioDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2" width="500" style="margin:0 auto;">
+                        <f:facet name="header">
+                            <h:outputText value="Cadastro de Usuário"/>
+                        </f:facet>
+
+                        <p:outputLabel value="Nome :" for="nome" />
+                        <p:inputText id="nome" value="#{usuarioBean.u.nome}" placeholder="Nome Completo" required="true"  style="width: 100%"/>
+
+                        <p:outputLabel value="Login :" for="login" />
+                        <p:inputText id="login" value="#{usuarioBean.u.login}" placeholder="Login" required="true"  style="width: 50%">
+                            <p:ajax event="blur" listener="#{usuarioBean.validaUsuario()}" partialSubmit="true" process="@this, nome" update="@form" />
+                        </p:inputText>
+
+                        <p:outputLabel value="Senha :" for="senha" />
+                        <p:password id="senha" value="#{usuarioBean.u.password}" placeholder="Senha" styleClass="Container80 Fnone MarAuto Fs18" feedback="false" style="width: 50%"/>
+
+                        <p:outputLabel value="Comfirmar Senha :" for="confSenha" />
+                        <p:password id="confSenha" value="#{usuarioBean.confPwd}" placeholder="Comfirmar Senha" styleClass="Container80 Fnone MarAuto Fs18" feedback="false" style="width: 50%"/>
+
+                        <p:outputLabel value="Tipo Usuário" for="tpUser"/>
+                        <p:selectOneMenu id="tpUser" value="#{usuarioBean.u.tipoUsuario}" required="true" converter="simpleIndexConverter" style="width: 85%" >
+                            <f:selectItems value="#{tipoUsuarioBean.tiposConverter}" var="t" itemValue="#{t}"/>
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Situação :" for="sit" />
+                        <p:selectOneRadio id="sit" value="#{usuarioBean.u.inAtivo}" required="true">
+                            <f:selectItem itemLabel="Ativo" itemValue="A" />
+                            <f:selectItem itemLabel="Inativo" itemValue="I" />
+                        </p:selectOneRadio>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" update="@form , :form:usuarioList , growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'usuarioDialog')" 
+                                             actionListener="#{usuarioBean.save()}"/>
+                        </f:facet>
+                    </h:panelGrid>
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog header="Redefinir Senha" widgetVar="senhaDialog"  id="senhaDlg" minHeight="40" > 
+                <h:form id="formSenhaUsuario">
+                    <h:panelGrid id="displayRedefinir" columns="2" cellspacing="3px" cellpadding="3px" style="margin:0 auto;">   
+
+                        <p:outputLabel value="Senha :" for="senhaRedefinir" />
+                        <p:password id="senhaRedefinir" value="#{usuarioBean.u.password}" placeholder="Senha" styleClass="Container80 Fnone MarAuto Fs18" feedback="false" style="width: 90%"/>
+
+                        <p:outputLabel value="Comfirmar Senha :" for="confSenhaRedefinir" />
+                        <p:password id="confSenhaRedefinir" value="#{usuarioBean.confPwd}" placeholder="Comfirmar Senha"
+                                    styleClass="Container80 Fnone MarAuto Fs18" feedback="false" style="width: 90%">
+                            <p:ajax event="keyup" update="out" process="@this,confSenhaRedefinir,senhaRedefinir" listener="#{usuarioBean.comfirma()}" />
+                        </p:password>
+
+                        <h:outputText id="out"  value="#{usuarioBean.comf}"  />
+
+                        <f:facet name="footer">
+                            <p:commandButton value=" Redefinir" 
+                                             update=":form:usuarioList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'senhaDialog')" 
+                                             actionListener="#{usuarioBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+
+                </h:form>
+            </p:dialog> 
+
+
+            <p:growl id="growl" showDetail="true"/>  
+
+
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

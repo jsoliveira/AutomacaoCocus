@@ -1,0 +1,147 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="l" value="#{ligacaoEntradaSaidaBean.ligacoes}" id="ligacaoEntradaSaidaList"
+                             styleClass="userDataTableStyle" 
+                             paginator="true" 
+                             rows="10" 
+                             rowsPerPageTemplate="10,15,50,100" 
+                             widgetVar="ligacaoEntradaSaidaTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhuma Ligação de Entrada para Saída Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Ligação" 
+                                         oncomplete="PF('ligacaoDialog').show();" 
+                                         ajax="true" 
+                                         update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" 
+                                         action="#{ligacaoEntradaSaidaBean.limpar()}"  />
+
+                        <!--                        <p:commandButton value="Atualizar Servidor" 
+                                                               
+                                                                 update=":form:messages" 
+                                                                 icon="icon-plus-1" 
+                                                                 action="#{ligacaoEntradaSaidaBean.atualizarServidor()}"  />-->
+                    </f:facet>
+
+
+                    <p:column headerText="Ponto de Entrada" style="width: 20%" priority="0">
+                        <h:outputText value="#{l.pontoEntrada}" />  
+                    </p:column>
+
+                    <p:column headerText="Porta de Entrada" style="width: 10%" priority="0">
+                        <h:outputText value="#{l.pontoEntrada.portaModelo.descricao}" />  
+                    </p:column>
+
+                    <p:column headerText="Ponto de Saída" style="width:20%" priority="0">  
+                        <h:outputText value="#{l.pontoSaida}" />  
+                    </p:column>  
+
+                    <p:column headerText="Porta de Saída" style="width: 10%" priority="0">
+                        <h:outputText value="#{l.pontoSaida.portaModelo.descricao}" />  
+                    </p:column>
+
+                    <p:column  headerText="Situação" style="width:15%" priority="2">  
+                        <h:outputText value="Ativo" rendered="#{l.inAtivo=='A'}" />  
+                        <h:outputText value="Inativo" rendered="#{l.inAtivo =='I'}" />  
+                    </p:column> 
+
+                    <p:column headerText="Data Transação" sortBy="#{c.dtTransacao}" style="text-align: center;width:15%" priority="3">
+                        <h:outputText value="#{l.dtTransacao}">
+                            <f:convertDateTime type="date" locale="pt_BR" timeZone="America/Sao_Paulo" />
+                        </h:outputText>
+                    </p:column>
+
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="1">  
+                        <p:commandButton  icon="fa icon-trash Fs15 white" 
+                                          update=":userDetailFormDel:displayDel,:form:ligacaoEntradaSaidaList" 
+                                          oncomplete="PF('delDialog').show()" 
+                                          >
+                            <f:setPropertyActionListener value="#{l}" target="#{ligacaoEntradaSaidaBean.l}" />  
+                        </p:commandButton>
+                    </p:column>  
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:ligacaoEntradaSaidaList , :growl" oncomplete="PF('delDialog').hide(); " actionListener="#{ligacaoEntradaSaidaBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Ligação de Entrada para Saída" widgetVar="ligacaoDialog"  id="ligacaoDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Ponto De Entrada :" for="pontoEntrada" />
+                        <p:selectOneMenu id="pontoEntrada" value="#{ligacaoEntradaSaidaBean.l.pontoEntrada}" converter="simpleIndexConverter" 
+                                         required="true">
+                            <f:selectItems value="#{pontoBean.pontosEntradaConverter}" 
+                                           var="pEnt" 
+                                           itemValue="#{pEnt}"
+                                           />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Ponto de Saída :" for="pontoSaida" />
+                        <p:selectOneMenu id="pontoSaida" value="#{ligacaoEntradaSaidaBean.l.pontoSaida}" converter="simpleIndexConverter" 
+                                         required="true">
+                            <f:selectItems value="#{pontoBean.pontosSaidaConverter}" 
+                                           var="pSai" 
+                                           itemValue="#{pSai}"
+                                           />
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Situação :" for="sit" />
+                        <p:selectOneRadio id="sit" value="#{ligacaoEntradaSaidaBean.l.inAtivo}" required="true">
+                            <f:selectItem itemLabel="Ativo" itemValue="A" />
+                            <f:selectItem itemLabel="Inativo" itemValue="I" />
+                        </p:selectOneRadio>
+
+                        <f:facet name="footer">
+                            <p:commandButton value=" Salvar" update="userDetailForm, :form:ligacaoEntradaSaidaList , :growl"
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args, 'ligacaoDialog' )"
+                                             actionListener="#{ligacaoEntradaSaidaBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+
+                </h:form>
+            </p:dialog> 
+
+            <p:growl id="growl" showDetail="true"/>  
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

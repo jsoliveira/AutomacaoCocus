@@ -1,0 +1,154 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="t" value="#{tipoPortaBean.tipos}" selection="#{tipoPortaBean.t}" id="tipoPortaList" editable="true"
+                             styleClass="userDataTableStyle" paginator="true" rows="10" 
+                             lazy="true" rowsPerPageTemplate="10,15,50,100" widgetVar="tipoPortaTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhuma Tipo de Porta Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value="Adicionar Tipo de Porta" 
+                                         oncomplete="PF('tipoPortaDialog').show();" 
+                                         ajax="true" update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" 
+                                         action="#{tipoPortaBean.limpar()}"  />
+                    </f:facet>
+
+                    <p:ajax event="rowEdit" listener="#{tipoPortaBean.onRowEdit}" update=":form:messages" />  
+                    <p:ajax event="rowEditCancel"  update=":form:messages" />  
+
+                    <p:column headerText="Código" style="width: 5%" priority="0">
+                        <p:commandLink value="#{t.id}" update=":userDetailForm:display" oncomplete="PF('tipoPortaDialog').show();"  >
+                            <f:setPropertyActionListener value="#{t}" target="#{tipoPortaBean.t}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Descrição" style="width:40%" priority="1">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{t.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{t.descricao}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column  headerText="Tipo da Porta" style="width:20%;text-align: center" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="Entrada" rendered="#{t.tpPorta=='E'}" />  
+                                <h:outputText value="Saída" rendered="#{t.tpPorta =='S'}" />  
+                            </f:facet>  
+                            <f:facet name="input" >  
+                                <p:selectOneRadio value="#{t.tpPorta}" required="true" tabindex="0" >
+                                    <f:selectItem itemLabel="Entrada" itemValue="E"  />
+                                    <f:selectItem itemLabel="Saída" itemValue="S" />
+                                </p:selectOneRadio>
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column> 
+                    
+                    <p:column  headerText="Situação" style="width:20% ;text-align: center" priority="3">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="Ativo" rendered="#{t.inAtivo=='A'}" />  
+                                <h:outputText value="Inativo" rendered="#{t.inAtivo =='I'}" />  
+                            </f:facet>  
+                            <f:facet name="input" >  
+                                <p:selectOneRadio value="#{t.inAtivo}" required="true" tabindex="0" >
+                                    <f:selectItem itemLabel="Ativo" itemValue="A"  />
+                                    <f:selectItem itemLabel="Inativo" itemValue="I" />
+                                </p:selectOneRadio>
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column> 
+
+                    <p:column headerText="Editar" style="width:10%" priority="4">  
+                        <p:rowEditor />  
+                    </p:column>   
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="5" >  
+                                 <p:commandButton icon="fa icon-trash Fs15 white" 
+                                         update=":userDetailFormDel:displayDel,:form:tipoPortaList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{t}" target="#{tipoPortaBean.t}" />  
+                        </p:commandButton>
+                    </p:column>  
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog"  resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:tipoPortaList , :growl" oncomplete="PF('delDialog').hide(); " actionListener="#{tipoPortaBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" update=":form:tipoPortaList , :growl" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Tipo de Porta" widgetVar="tipoPortaDialog"  id="areaDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Código :" for="cod"/>
+                        <h:outputText id="cod" value="#{tipoPortaBean.t.id}" style="width: 10%" />
+
+                        <p:outputLabel value="Descrição :" for="descricao" />
+                        <p:inputText id="descricao" value="#{tipoPortaBean.t.descricao}" required="true"  style="width: 60%"/>
+
+                        <p:outputLabel value="Tipo Porta :" for="tipo" />
+                        <p:selectOneRadio id="tipo" value="#{tipoPortaBean.t.tpPorta}" required="true">
+                            <f:selectItem itemLabel="Entrada" itemValue="E" />
+                            <f:selectItem itemLabel="Saída" itemValue="S" />
+                        </p:selectOneRadio>
+                        
+                        <p:outputLabel value="Situação :" for="sit" />
+                        <p:selectOneRadio id="sit" value="#{tipoPortaBean.t.inAtivo}" required="true">
+                            <f:selectItem itemLabel="Ativo" itemValue="A" />
+                            <f:selectItem itemLabel="Inativo" itemValue="I" />
+                        </p:selectOneRadio>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" 
+                                             update="userDetailForm ,:form:tipoPortaList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args, 'tipoPortaDialog' )" 
+                                             actionListener="#{tipoPortaBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+                 
+                </h:form>
+            </p:dialog> 
+
+            <p:growl id="growl" showDetail="true"/>  
+
+        </div>
+
+    </ui:define>
+
+</ui:composition>
+
+

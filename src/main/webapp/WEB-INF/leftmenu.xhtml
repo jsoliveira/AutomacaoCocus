@@ -1,0 +1,41 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ps="http://primefaces.org/sentinel"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+
+    <div id="layout-menubar" class="Unselectable fontRegular">
+        <div class="layout-menubarinner-box" id="buttonArea">
+            <a href="#" id="layout-menubar-resize" class="BordRad3" title="Menu"><i class="icon-th-list-2"></i></a>
+            <a href="#" id="layout-menubar-resize2" class="BordRad3" title="Abrir Menu"><i class="icon-menu"></i></a>
+        </div>
+
+        <!--        <div class="layout-menubarinner-box" id="searchArea">
+                    <i class="icon-search floatLeft gray"></i>
+                    <input type="text" class="layout-menubar-search floatLeft Animated05" placeholder="Search Here"/>
+                </div>-->
+
+        <ps:menu id="sm_leftmenu">
+            
+            <p:menuitem id="sm_index" value="Painel" icon="icon-globe" outcome="index"   />
+
+            <p:submenu id="sm_cadastro" label="Cadastros" icon="icon-plus-squared" >
+
+                <p:menuitem id="sm_area" value="Aréa" icon="icon-doc-text-1" outcome="area"/>
+                <p:menuitem id="sm_ligacao_entrada_saida" value="Ligação Entrada/Saída" icon="icon-doc-text-1" outcome="ligacaoEntradaSaida"/>
+                <p:menuitem id="sm_modelo" value="Modelo" icon="icon-doc-text-1" outcome="modelo"/>
+                <p:menuitem id="sm_modulo" value="Modulo" icon="icon-doc-text-1" outcome="modulo"/>
+                <p:menuitem id="sm_parametros" value="Parâmetros" icon="icon-doc-text-1" outcome="parametro"/>
+                <p:menuitem id="sm_ponto" value="Ponto" icon="icon-doc-text-1" outcome="ponto"/>
+                <p:menuitem id="sm_tipo_porta" value="Tipo de Porta" icon="icon-doc-text-1" outcome="tipoPorta"/>
+                <p:menuitem id="sm_tipo_usuario" value="Tipo de Usuário" icon="icon-doc-text-1" outcome="tipoUsuario"/>
+            </p:submenu>
+
+
+        </ps:menu>
+
+    </div>
+
+</ui:composition>

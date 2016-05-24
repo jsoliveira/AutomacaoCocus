@@ -1,0 +1,138 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pe="http://primefaces.org/ui/extensions"
+                template="/WEB-INF/template.xhtml"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:define name="content">
+        <div class="ContainerIndent">
+
+            <h:form id="formPrincipal">
+
+                <p:growl id="msg" showDetail="true" />
+
+                <h:panelGrid columns="3" style="float: left" cellspacing="5px">
+                    <h:outputLabel for="area" value="Aréa"  style="font-weight:  bold"/>
+                    <p:selectOneMenu id="area" value="#{indexBean.areaSel}" converter="simpleIndexConverter" style="font-weight: bold">
+                        <f:selectItems value="#{areaBean.areasConverter}" var="a"  itemValue="#{a}"/>
+                        <p:ajax event="change" process="@this" update="pontos msg" partialSubmit="true" listener="#{indexBean.setarPontosArea()}"/>
+                    </p:selectOneMenu>
+
+                    <p:commandButton id="btnRecarrecar" value="Recarregar" actionListener="#{indexBean.setarPontosArea()}" />
+                </h:panelGrid>
+
+                <h:panelGrid columns="3" style="float: right" cellspacing="5px">
+
+                    <h:outputText value="Att. Auto "  />
+                    <p:selectBooleanCheckbox id="booleanAtt" value="#{indexBean.atualizar}" >
+                        <p:ajax update="@form" listener="#{indexBean.testarAtt()}" />
+                    </p:selectBooleanCheckbox>
+
+                    <p:selectOneMenu id="tmpAtt" value="#{indexBean.tmpAtualizar}" style="width:125px">
+                        <f:selectItem itemLabel="A Cada 10 Segundos" itemValue="10" />
+                        <f:selectItem itemLabel="A Cada 30 Segundos" itemValue="30" />
+                        <f:selectItem itemLabel="A Cada 1 Minuto" itemValue="60" />
+                        <f:selectItem itemLabel="A Cada 2 Mintos" itemValue="120" />
+                        <p:ajax update="@this poll" partialSubmit="true" process="@this"/>
+                    </p:selectOneMenu>
+
+
+
+                </h:panelGrid>
+
+                <p:poll id="poll" interval="#{indexBean.tmpAtualizar}" listener="#{indexBean.setarPontosArea()}" 
+                        update="pontos" 
+                        autoStart="#{indexBean.atualizar}"
+                        stop="#{indexBean.stop}"
+                        partialSubmit="true" 
+                        />
+
+                <div class="EmptyBox10"></div>
+
+                <p:blockUI block="formPrincipal" trigger="booleanAtt,btnRecarrecar,area,poll">
+                    <p:graphicImage name="/imagens/ajax-loader1.gif"/>
+                </p:blockUI>
+
+                <p:dataScroller value="#{indexBean.pontosArea}"  var="p"
+                                id="pontos" 
+                                chunkSize="10" 
+                                mode="inline" 
+                                scrollHeight="500"  style="float: bottom" >
+
+                    <h:panelGrid columns="2">
+
+                        <h:panelGrid style="text-align: center">
+                            <p:graphicImage  id="img" height="80px" width="80px"  name="#{p.img}" />   
+
+                            <p:selectBooleanButton id="btnLiga" value="#{p.ligado}"  
+                                                   onLabel="Ligado" onIcon="ui-icon-check"
+                                                   offLabel="Desligado" offIcon="ui-icon-close"
+                                                   >
+
+                                <p:ajax partialSubmit="true" update="img :formPrincipal:msg" process="btnLiga " listener="#{p.ligar()}" />
+
+                            </p:selectBooleanButton>
+                        </h:panelGrid>
+
+
+                        <p:outputPanel>
+                            <h:panelGrid columns="2" cellpadding="5">
+                                <h:outputText value="Id:" />
+                                <h:outputText value="#{p.ponto.id}" style="font-weight: bold"/>
+
+                                <h:outputText value="Descrição:" />
+                                <h:outputText value="#{p.ponto.rotulo}" style="font-weight: bold"/>
+
+                                <h:outputText value="Módulo:" />
+                                <h:outputText value="#{p.ponto.modulo.descricao}" style="font-weight: bold"/>
+
+                                <h:outputText value="Porta:" />
+                                <h:outputText value="#{p.ponto.portaModelo.descricao}" style="font-weight: bold"/>
+
+                            </h:panelGrid>
+                        </p:outputPanel>
+                    </h:panelGrid>
+
+                </p:dataScroller>
+
+            </h:form>
+
+
+<!--            <p:dialog header="#{indexBean.pontoSel.rotulo}"
+                      widgetVar="pontoDialog" 
+                      position="center"  
+                      id="pontoDlg" 
+                      minHeight="10" 
+                      width="150" >
+
+                <h:form id="formPontoDialog">
+                    <h:panelGrid columns="1" style=" text-align:left;" width="100" >
+
+                        <p:graphicImage  id="imgSD0" height="80px" width="80px"  name="#{indexBean.img}" />               
+
+                        <p:inputSwitch  id="ligadoSD0" value="#{indexBean.ligado}" 
+                                        onLabel="Ligado" offLabel="Desligado">
+                            <p:ajax listener="#{indexBean.ligarSD0()}" update="imgSD0   :formPrincipal:msg"/>
+                        </p:inputSwitch>
+
+                        <p:selectBooleanButton id="value2" value="#{indexBean.ligado}" 
+                                               onLabel="Ligado" offLabel="Desligado" 
+                                               onIcon="ui-icon-check" offIcon="ui-icon-close"
+                                               >
+
+                                <p:ajax update="msgs" listener="#{selectBooleanView.addMessage}" />
+                        </p:selectBooleanButton>
+
+
+                    </h:panelGrid>
+                </h:form>
+            </p:dialog>-->
+
+        </div>
+    </ui:define>
+
+</ui:composition>
+
