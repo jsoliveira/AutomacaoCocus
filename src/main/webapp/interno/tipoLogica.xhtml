@@ -1,0 +1,142 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <div class="ContainerIndent">
+
+            <h:form id="form" >  
+
+                <p:growl id="messages" showDetail="true"/>  
+
+                <p:dataTable var="tl" value="#{tipoLogicaBean.tipoLogicas}" selection="#{tipoLogicaBean.tl}" 
+                             id="tipoLogicaList" editable="true"
+                             styleClass="userDataTableStyle" paginator="true" rows="10" 
+                             lazy="true" rowsPerPageTemplate="10,15,50,100" widgetVar="tipoLogicaTable"
+                             paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                             emptyMessage="Nenhum Tipo de Lógica Cadastrada"  >  
+
+                    <f:facet name="header" >
+                        <p:commandButton value=" Adicionar Tipo de Lógica" oncomplete="PF('tipoLogicaDialog').show();" 
+                                         ajax="true" update=":userDetailForm:display" 
+                                         icon="fa icon-doc-add Fs18 white" title="Cadastro" 
+                                         action="#{tipoLogicaBean.clear()}"  />
+
+                    </f:facet>
+
+
+                    <p:ajax event="rowEdit" listener="#{tipoLogicaBean.onRowEdit}" update=":form:messages" />  
+                    <p:ajax event="rowEditCancel"  update=":form:messages" />  
+
+                    <p:column headerText="Código" style="width: 5%" priority="1">
+                        <p:commandLink value="#{tl.id}" update=":userDetailForm:display" oncomplete="PF('tipoLogicaDialog').show();"  >
+                            <f:setPropertyActionListener value="#{tl}" target="#{tipoLogicaBean.tl}" />    
+                        </p:commandLink>
+                    </p:column>
+
+                    <p:column headerText="Descrição" style="width:40%" priority="2">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="#{tl.descricao}" />  
+                            </f:facet>  
+                            <f:facet name="input">  
+                                <p:inputText value="#{tl.descricao}" style="width:100%" required="true"/>  
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column>  
+
+                    <p:column  headerText="Operador" style="width:20%" priority="3">  
+                        <p:cellEditor>  
+                            <f:facet name="output">  
+                                <h:outputText value="E" rendered="#{tl.operador == 'E'}" />  
+                                <h:outputText value="OU" rendered="#{tl.operador == 'OU'}" />  
+                            </f:facet>  
+                            <f:facet name="input" >  
+                                <p:selectOneRadio value="#{tl.operador}" required="true" tabindex="0" >
+                                    <f:selectItem itemLabel="E" itemValue="E"  />
+                                    <f:selectItem itemLabel="Ou" itemValue="O" />
+                                </p:selectOneRadio>
+                            </f:facet>  
+                        </p:cellEditor>  
+                    </p:column> 
+                    
+                    <p:column headerText="Editar" style="width:10%" priority="4">  
+                        <p:rowEditor />  
+                    </p:column>   
+
+                    <p:column headerText="Excluir" style="width: 10%" priority="5">  
+                        <f:facet name="header">  
+                            <h:outputText value=""/>  
+                        </f:facet> 
+                        <p:commandButton icon="fa icon-trash Fs15 white" 
+                                         update=":userDetailFormDel:displayDel,:form:tipoLogicaList" 
+                                         oncomplete="PF('delDialog').show()" >
+                            <f:setPropertyActionListener value="#{tl}" target="#{tipoLogicaBean.tl}" />  
+                        </p:commandButton>
+                    </p:column>  
+                </p:dataTable> 
+            </h:form> 
+
+
+            <p:dialog header="Confirmar Exclusão?" widgetVar="delDialog" resizable="false" id="delDlg"  > 
+                <h:form id="userDetailFormDel">
+                    <h:panelGrid id="displayDel" columns="2"  style="margin:0 auto;">   
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Sim" update=":form:tipoLogicaList , :growl" oncomplete="PF('delDialog').hide(); " actionListener="#{tipoLogicaBean.del()}"/>
+                        </f:facet>
+                        <f:facet name="footer">
+                            <p:commandButton value="Não" update=":form:tipoLogicaList , :growl" oncomplete="PF('delDialog').hide(); " />
+                        </f:facet>
+
+                    </h:panelGrid> 
+                </h:form>
+            </p:dialog> 
+
+
+            <p:dialog header="Tipo Lógica" widgetVar="tipoLogicaDialog"  id="tipoLogicaDlg" minHeight="40" > 
+                <h:form id="userDetailForm">
+                    <h:panelGrid id="display" columns="2"  style="margin:0 auto;">   
+
+                        <p:outputLabel value="Código :" for="cod"/>
+                        <h:outputText id="cod" value="#{tipoLogicaBean.tl.id}" style="width: 10%" />
+
+                        <p:outputLabel value="Descrição :" for="descricao" />
+                        <p:inputText id="descricao" value="#{tipoLogicaBean.tl.descricao}" required="true"  style="width: 60%"/>
+
+
+                        <p:outputLabel value="Operador :" for="opd" />
+                        <p:selectOneRadio id="opd" value="#{tipoLogicaBean.tl.operador}" required="true">
+                            <f:selectItem itemLabel="E" itemValue="E" />
+                            <f:selectItem itemLabel="OU" itemValue="OU" />
+                        </p:selectOneRadio>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Salvar" 
+                                             update="userDetailForm ,:form:tipoLogicaList , :growl" 
+                                             icon="fa icon-doc-add Fs18 white" 
+                                             oncomplete="closeDialogIfSucess(xhr, status, args,'tipoLogicaDialog')" 
+                                             actionListener="#{tipoLogicaBean.save()}"/>
+                        </f:facet>
+
+                    </h:panelGrid> 
+
+                </h:form>
+            </p:dialog> 
+
+            <p:growl id="growl" showDetail="true"/>  
+
+
+        </div>
+
+
+
+    </ui:define>
+
+</ui:composition>
+
+

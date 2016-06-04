@@ -15,7 +15,7 @@
                 <p:growl id="msg" showDetail="true" />
 
                 <h:panelGrid columns="3" style="float: left" cellspacing="5px">
-                    <h:outputLabel for="area" value="Aréa"  style="font-weight:  bold"/>
+                    <h:outputLabel for="area" value="Área"  style="font-weight:  bold"/>
                     <p:selectOneMenu id="area" value="#{indexBean.areaSel}" converter="simpleIndexConverter" style="font-weight: bold">
                         <f:selectItems value="#{areaBean.areasConverter}" var="a"  itemValue="#{a}"/>
                         <p:ajax event="change" process="@this" update="pontos msg" partialSubmit="true" listener="#{indexBean.setarPontosArea()}"/>
