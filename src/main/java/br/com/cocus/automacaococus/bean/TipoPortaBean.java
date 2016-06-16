@@ -1,6 +1,6 @@
 package br.com.cocus.automacaococus.bean;
 
-import br.com.cocus.automacaococus.dao.TipoPortaDao;
+import br.com.cocus.automacaococus.dao.TipoPortaDAO;
 import br.com.cocus.automacaococus.model.TipoPorta;
 import br.com.cocus.automacaococus.tools.Mensagem;
 import java.io.Serializable;
@@ -24,7 +24,7 @@ public class TipoPortaBean implements Serializable {
     private Mensagem men;
 
     @Inject
-    private TipoPortaDao tDao;
+    private TipoPortaDAO tDao;
 
     private TipoPorta t;
 
